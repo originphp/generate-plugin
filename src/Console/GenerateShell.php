@@ -44,6 +44,8 @@ class GenerateShell extends Shell
      */
     protected $meta = [];
 
+    public $description = 'Code generation shell';
+
     protected function introspectDatabase()
     {
         $this->loadTask('Generate.Generate');
