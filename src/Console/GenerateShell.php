@@ -225,18 +225,22 @@ class GenerateShell extends Shell
     public function all()
     {
         $avilable = $this->getAvailable();
+  
         if (empty($this->args)) {
             $models = $avilable;
-            $this->out('Generate Model, View and Controller for each of the following models:');
-            $this->out('');
-            foreach ($models as $model) {
-                $this->out("<white>- {$model}</white>");
+            if( !$this->params('force')){
+                $this->out('Generate Model, View and Controller for each of the following models:');
+                $this->out('');
+                foreach ($models as $model) {
+                    $this->out("<white>- {$model}</white>");
+                }
+        
+                $result = $this->in('Do you want to continue?', ['y','n'], 'n');
+                if ($result === 'n') {
+                    return;
+                }
             }
-    
-            $result = $this->in('Do you want to continue?', ['y','n'], 'n');
-            if ($result === 'n') {
-                return;
-            }
+           
         } else {
             $models = $this->args;
         }
@@ -319,7 +323,17 @@ class GenerateShell extends Shell
         if (!file_put_contents($filename, $result)) {
             throw new ConsoleException('Error writing file');
         }
-        $this->status('ok',sprintf('%s controller', $controller));
+        $this->status('ok',sprintf('%sController', $controller));
+
+
+         # Generate ControllerTest
+         $Templater = new GenerateTemplater();
+         $filename = TESTS . "/TestCase/Controller/{$controller}ControllerTest.php";  
+         if(!$this->checkFileExists($filename)){
+             if(file_put_contents($filename,$Templater->generate('controllerTest',  $data))){
+                 $this->status('ok',sprintf('%sControllerTest', $controller));
+             }
+         }
     }
 
     public function model(string $model = null)
@@ -384,9 +398,39 @@ class GenerateShell extends Shell
         if (!file_put_contents($filename, $result)) {
             throw new ConsoleException('Error writing file');
         }
-        $this->status('ok',sprintf('%s model', $model));
+        $this->status('ok',sprintf('%s', $model));
+
+        
+
+         # Generate ModelTest
+         $Templater = new GenerateTemplater();
+         $filename = TESTS . "/TestCase/Model/{$model}Test.php";  
+         if(!$this->checkFileExists($filename)){
+             if(file_put_contents($filename,$Templater->generate('modelTest', ['model'=>$model]))){
+                 $this->status('ok',sprintf('%sTest', $model));
+             }
+         }
+
+        # Generate ModelFixture
+        $Templater = new GenerateTemplater();
+        $filename = TESTS . "/Fixture/{$model}Fixture.php";  
+        if(!$this->checkFileExists($filename)){
+            if(file_put_contents($filename,$Templater->generate('modelFixture', ['model'=>$model]))){
+                $this->status('ok',sprintf('%sFixture', $model));
+            }
+        }
+        
     }
 
+    protected function checkFileExists(string $filename){
+        if (file_exists($filename)) {
+            $result = $this->in(sprintf('%s already exists, overwrite?', $filename), ['y','n'], 'n');
+            if ($result === 'n') {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public function view(string $controller = null)
     {
@@ -500,8 +544,24 @@ class GenerateShell extends Shell
 
         $Templater = new GenerateTemplater();
         $result = $Templater->generate('shell', ['shell'=>$shell]);
+       
         if(file_put_contents($filename,$result)){
             $this->status('ok',sprintf('%sShell', $shell));
+            $filename = TESTS . "/TestCase/Console/{$shell}ShellTest.php";
+            if (file_exists($filename)) {
+                $result = $this->in(sprintf('%sShellTest already exist, overwrite?', $shell), ['y','n'], 'n');
+                if ($result === 'n') {
+                    exit;
+                }
+            }
+            $Templater = new GenerateTemplater();
+            $result = $Templater->generate('shellTest', ['shell'=>$shell]);
+            if(file_put_contents($filename,$result)){
+                $this->status('ok',sprintf('%sShellTest', $shell));
+            }
+            else{
+                $this->status('error',sprintf('%sShellTest', $shell));
+            }
         }
         else{
             $this->status('error',sprintf('%sShell', $shell));
@@ -509,7 +569,7 @@ class GenerateShell extends Shell
        
     }
 
-  
+
 
     protected function getData(string $model)
     {
