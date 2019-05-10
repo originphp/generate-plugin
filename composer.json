@@ -1,0 +1,10 @@
+{
+    "name":"originphp/generate-plugin",
+    "description":"OriginPHP Generate Plugin",
+    "autoload": {
+      "psr-4": {
+        "Generate\\": "src/",
+        "Generate\\Test\\": "tests/"
+      }
+    }
+  }
