@@ -62,7 +62,7 @@ class GenerateShell extends Shell
 
     public function initialize()
     {
-        if (!file_exists(CONFIG . DS . 'database2.php')) {
+        if (!file_exists(CONFIG . DS . 'database.php')) {
             $this->error('No database configuration found','Create config/database.php using the template in the same directory');
             return;
         }
