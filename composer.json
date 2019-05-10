@@ -1,10 +1,17 @@
 {
-    "name":"originphp/generate-plugin",
-    "description":"OriginPHP Generate Plugin",
-    "autoload": {
-      "psr-4": {
-        "Generate\\": "src/",
-        "Generate\\Test\\": "tests/"
-      }
+  "name":"originphp/generate-plugin",
+  "description":"OriginPHP Generate Plugin",
+  "type": "originphp-plugin",
+  "autoload": {
+    "psr-4": {
+      "Generate\\": "src/",
+      "Generate\\Test\\": "tests/"
     }
+  },
+  "require": {
+    "originphp/plugin-installer": "*"
+  },
+  "extra": {
+    "install": "plugins/generate"
   }
+}
