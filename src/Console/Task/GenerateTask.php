@@ -103,6 +103,7 @@ class GenerateTask extends Task
          *  [singularHumanLower] => bookmarks tag
          *  [pluralHumanLower] => bookmarks tags
          */
+        $data = [];
         foreach ($models as $model) {
             $plural = Inflector::pluralize($model);
             $data[$model] = [

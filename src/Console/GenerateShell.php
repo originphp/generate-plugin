@@ -126,6 +126,15 @@ class GenerateShell extends Shell
                     ]
             ]
         ]);
+        $this->addCommand('migration',[
+            'help' => 'generates a migration e.g. CreateProductsTable',
+            'arguments' => [
+                'name' => [
+                    'help'=>'migration name e.g. CreateProductsTable',
+                    'required' => true
+                    ]
+            ]
+        ]);
     }
     public function plugin()
     {
@@ -492,6 +501,29 @@ class GenerateShell extends Shell
         $this->status('ok',sprintf('%s views', $controller));
     }
 
+
+    public function migration(){
+        $name = $this->args(0);
+        if($name === null){
+            $this->error('You must provide a class name. e.g CreateProductsTable');
+        }
+        $this->checkArgument($name);
+        $folder = ROOT . '/db/migrate';
+        if(!file_exists($folder)){
+            mkdir($folder,0775,true);
+        }
+        $version = date('Ymdhis');
+        $filename =  $folder . "/{$version}{$name}.php";
+
+        $Templater = new GenerateTemplater();
+        $result = $Templater->generate('migration', ['migration'=>$name]);
+        if(file_put_contents($filename,$result)){
+            $this->status('ok',sprintf('%sMigration', $version . $name));
+        }
+        else{
+            $this->status('error',sprintf('%sMigration', $version . $name));
+        }
+    }
 
     public function middleware(string $middleware=null){
         if($middleware === null AND $this->args(0)){
